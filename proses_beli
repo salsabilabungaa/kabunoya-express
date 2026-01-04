@@ -1,0 +1,25 @@
+<?php
+include 'koneksi.php'; // Pastikan koneksi ke database yang sama dengan admin
+
+if (isset($_POST['beli'])) {
+    $id_user = $_SESSION['user_id']; // ID User yang beli
+    $id_produk = $_POST['id_produk']; // ID Produk yang dipilih
+    $jumlah_beli = $_POST['jumlah']; // Jumlah yang dibeli
+    $total_harga = $_POST['total'];
+    $tgl = date('Y-m-d H:i:s');
+
+    // 1. Masukkan ke tabel transaksi agar tampil di 'Pesanan Masuk' Admin
+    $query_transaksi = "INSERT INTO transaksi (id_user, total, tanggal) 
+                        VALUES ('$id_user', '$total_harga', '$tgl')";
+    
+    if (mysqli_query($conn, $query_transaksi)) {
+        
+        // 2. KURANGI STOK PRODUK (PENTING!)
+        // Ini akan membuat angka stok di halaman index.php admin berkurang otomatis
+        mysqli_query($conn, "UPDATE produk SET stok = stok - $jumlah_beli 
+                             WHERE id_produk = '$id_produk'");
+
+        echo "<script>alert('Pesanan Terkirim!'); window.location='index.php';</script>";
+    }
+}
+?>
